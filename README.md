@@ -25,10 +25,11 @@ camera image showing the latest radar map.
 
 ### Enable the component
 
-You can enable the component by adding it to `configuration.yaml`:
+You can enable the component by adding the camera platform to `configuration.yaml`:
 
 ```yaml
-fmi_radar:
+camera:
+  - platform: fmi_testbed
 ```
 
 ### Debug logging
@@ -39,7 +40,7 @@ Enable debug logging for the component by adding the following to `configuration
 logger:
   default: info
   logs:
-    custom_components.fmi_radar: debug
+    custom_components.fmi_testbed: debug
 ```
 
 ## Displaying the radar map in the Home Assistant UI
@@ -48,7 +49,11 @@ You can display the radar map using a picture entity or a picture glance card.
 
 ```yaml
 type: picture-entity
-entity: camera.fmi_radar
+entity: camera.fmi_testbed
 show_name: true
 show_state: false
 ```
+
+![image](https://github.com/user-attachments/assets/3a0c48fc-4b6a-4e2b-8f3b-275c41b178cb)
+
+

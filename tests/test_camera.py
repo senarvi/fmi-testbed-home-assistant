@@ -67,7 +67,7 @@ async def test_initial_properties(camera):
 
 @pytest.mark.asyncio
 async def test_async_camera_image_without_cache(camera, session):
-    """Test camera image when no cache exists."""
+    """Test updating the camera image when the cache doeosn't exist."""
     assert not os.path.exists(camera._cache_path)
 
     camera._last_update = datetime.now() - timedelta(minutes=1)
@@ -89,7 +89,7 @@ async def test_async_camera_image_without_cache(camera, session):
 
 @pytest.mark.asyncio
 async def test_async_camera_image_with_cache(camera, session):
-    """Test camera image with cached file."""
+    """Test updating the camera image when the cache exists."""
     cached_image = b"mock-png-2"
     with open(camera._cache_path, "wb") as f:
         f.write(cached_image)
@@ -140,29 +140,31 @@ async def test_download_and_cache_failure(camera):
 
 
 @pytest.mark.asyncio
-async def test_parse_image_urls(camera, session):
+async def test_read_image_urls(camera, session):
     """Test parsing image URLs from HTML."""
     with patch(
         "custom_components.fmi_testbed.camera.async_get_clientsession",
         return_value=session,
-    ), patch.object(
-        camera, "_download_and_cache_image", return_value=True
-    ) as mock_download:
-        await camera._update_image()
-        mock_download.assert_called_once_with(IMAGE_URL)
+    ):
+        urls = await camera._read_image_urls()
+        assert len(urls) == 2
+        assert urls[0] == "https://test.url/image1.png"
+        assert urls[1] == "https://test.url/image2.png"
 
 
 @pytest.mark.asyncio
-async def test_parse_image_urls_failure(camera):
+async def test_read_image_urls_failure(camera):
     """Test handling of missing image URLs in HTML."""
     bad_html = "<html><body>No script here</body></html>"
     mock_response = AsyncMock()
     mock_response.status = 200
-    mock_response.text = AsyncMock(return_value=bad_html)
+    mock_response.text.return_value = bad_html
+    session = AsyncMock()
+    session.get.return_value = mock_response
 
     with patch(
         "custom_components.fmi_testbed.camera.async_get_clientsession",
         return_value=session,
     ):
-        await camera._update_image()
-        assert camera._last_update is None
+        urls = await camera._read_image_urls()
+        assert not urls

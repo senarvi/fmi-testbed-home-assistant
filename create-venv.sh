@@ -12,7 +12,7 @@ source "${venv}/bin/activate"
 pip install --upgrade pip
 
 pip install \
-  beautifulsoup4 \
+  aiofiles \
   mypy \
   pre-commit \
   requests \
